@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import SectionHeading from "@/components/SectionHeading";
+import { StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 
 import imgBox from "@/assets/product-wooden-box.jpg";
 import imgPallet from "@/assets/product-pallet.jpg";
@@ -29,30 +29,29 @@ const Products = () => (
 
     <section className="section-padding bg-background">
       <div className="container-max">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((p, i) => (
-            <div
-              key={p.name}
-              className="bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col"
-            >
-              <div className="aspect-square overflow-hidden">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.1}>
+          {products.map((p) => (
+            <StaggerItem key={p.name} variant="scale-in">
+              <div className="bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
+                <div className="aspect-square overflow-hidden">
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="font-display font-semibold text-lg text-foreground">{p.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 flex-1">{p.desc}</p>
+                  <p className="text-xs text-secondary font-medium mt-2">Usage: {p.usage}</p>
+                  <Button asChild className="mt-4 gradient-wood border-0 text-white hover:opacity-90 w-full">
+                    <Link to="/enquiry">Send Enquiry</Link>
+                  </Button>
+                </div>
               </div>
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="font-display font-semibold text-lg text-foreground">{p.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1 flex-1">{p.desc}</p>
-                <p className="text-xs text-secondary font-medium mt-2">Usage: {p.usage}</p>
-                <Button asChild className="mt-4 gradient-wood border-0 text-white hover:opacity-90 w-full">
-                  <Link to="/enquiry">Send Enquiry</Link>
-                </Button>
-              </div>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   </div>
