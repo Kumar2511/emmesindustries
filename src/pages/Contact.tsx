@@ -1,5 +1,6 @@
 import { Phone, Mail, MapPin, Building2 } from "lucide-react";
 import SectionHeading from "@/components/SectionHeading";
+import ScrollReveal, { StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 
 const Contact = () => (
   <div>
@@ -14,64 +15,71 @@ const Contact = () => (
       <div className="container-max">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Info */}
-          <div className="space-y-6">
+          <div>
             <SectionHeading title="Get In Touch" subtitle="Reach out to us for any queries or orders" />
+            <StaggerContainer className="space-y-5" staggerDelay={0.1}>
+              <StaggerItem variant="slide-left">
+                <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg gradient-forest flex items-center justify-center shrink-0">
+                    <MapPin className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Address</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      51/2, Ranganayaki Nagar Extension,<br />
+                      Periyanaickenpalayam,<br />
+                      Coimbatore – 641020,<br />
+                      Tamil Nadu, India
+                    </p>
+                  </div>
+                </div>
+              </StaggerItem>
 
-            <div className="space-y-5">
-              <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg gradient-forest flex items-center justify-center shrink-0">
-                  <MapPin className="h-5 w-5 text-primary-foreground" />
+              <StaggerItem variant="slide-left">
+                <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg gradient-wood flex items-center justify-center shrink-0">
+                    <Phone className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Mobile</h3>
+                    <a href="tel:+919843167364" className="text-sm text-muted-foreground mt-1 block hover:text-secondary transition-colors">
+                      +91 9843167364
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Address</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    51/2, Ranganayaki Nagar Extension,<br />
-                    Periyanaickenpalayam,<br />
-                    Coimbatore – 641020,<br />
-                    Tamil Nadu, India
-                  </p>
-                </div>
-              </div>
+              </StaggerItem>
 
-              <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg gradient-wood flex items-center justify-center shrink-0">
-                  <Phone className="h-5 w-5 text-white" />
+              <StaggerItem variant="slide-left">
+                <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg gradient-forest flex items-center justify-center shrink-0">
+                    <Mail className="h-5 w-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Email</h3>
+                    <a href="mailto:emmes2010@gmail.com" className="text-sm text-muted-foreground mt-1 block hover:text-secondary transition-colors">
+                      emmes2010@gmail.com
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Mobile</h3>
-                  <a href="tel:+919843167364" className="text-sm text-muted-foreground mt-1 block hover:text-secondary transition-colors">
-                    +91 9843167364
-                  </a>
-                </div>
-              </div>
+              </StaggerItem>
 
-              <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg gradient-forest flex items-center justify-center shrink-0">
-                  <Mail className="h-5 w-5 text-primary-foreground" />
+              <StaggerItem variant="slide-left">
+                <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg gradient-wood flex items-center justify-center shrink-0">
+                    <Building2 className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Sister Concern</h3>
+                    <p className="text-sm text-muted-foreground mt-1">ESS GEE Packaging</p>
+                    <p className="text-xs text-muted-foreground">GST: 33AQUPS6145A1ZP</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Email</h3>
-                  <a href="mailto:emmes2010@gmail.com" className="text-sm text-muted-foreground mt-1 block hover:text-secondary transition-colors">
-                    emmes2010@gmail.com
-                  </a>
-                </div>
-              </div>
-
-              <div className="bg-card rounded-xl border border-border p-5 flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg gradient-wood flex items-center justify-center shrink-0">
-                  <Building2 className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Sister Concern</h3>
-                  <p className="text-sm text-muted-foreground mt-1">ESS GEE Packaging</p>
-                  <p className="text-xs text-muted-foreground">GST: 33AQUPS6145A1ZP</p>
-                </div>
-              </div>
-            </div>
+              </StaggerItem>
+            </StaggerContainer>
           </div>
 
           {/* Map */}
-          <div className="animate-fade-up">
+          <ScrollReveal variant="slide-right" delay={0.2}>
             <div className="rounded-xl overflow-hidden border border-border shadow-sm h-full min-h-[400px]">
               <iframe
                 title="EMMES Industries Location"
@@ -83,7 +91,7 @@ const Contact = () => (
                 referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

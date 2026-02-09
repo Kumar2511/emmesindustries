@@ -1,5 +1,6 @@
 import { Building2 } from "lucide-react";
 import SectionHeading from "@/components/SectionHeading";
+import { StaggerContainer, StaggerItem } from "@/components/ScrollReveal";
 
 const clients = [
   "AQUASUB Engineering Unit IV",
@@ -25,19 +26,18 @@ const Clients = () => (
     <section className="section-padding bg-background">
       <div className="container-max">
         <SectionHeading title="Companies We Serve" subtitle="We are proud to partner with industry leaders across India" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.08}>
           {clients.map((c) => (
-            <div
-              key={c}
-              className="bg-card rounded-xl border border-border p-6 flex items-center gap-4 hover:shadow-md hover:border-secondary/40 transition-all duration-300"
-            >
-              <div className="w-12 h-12 rounded-lg gradient-forest flex items-center justify-center shrink-0">
-                <Building2 className="h-6 w-6 text-primary-foreground" />
+            <StaggerItem key={c} variant="fade-up">
+              <div className="bg-card rounded-xl border border-border p-6 flex items-center gap-4 hover:shadow-md hover:border-secondary/40 transition-all duration-300">
+                <div className="w-12 h-12 rounded-lg gradient-forest flex items-center justify-center shrink-0">
+                  <Building2 className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <span className="font-medium text-foreground">{c}</span>
               </div>
-              <span className="font-medium text-foreground">{c}</span>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   </div>
