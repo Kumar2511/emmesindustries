@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const products = [
   "Wooden Boxes",
@@ -18,18 +19,31 @@ const products = [
 const Enquiry = () => {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "", company: "", phone: "", email: "", product: "", quantity: "", message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.product) {
       toast({ title: "Please fill required fields", variant: "destructive" });
       return;
     }
-    setSubmitted(true);
-    toast({ title: "Enquiry submitted successfully!" });
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-enquiry", {
+        body: form,
+      });
+      if (error) throw error;
+      setSubmitted(true);
+      toast({ title: "Enquiry submitted successfully!" });
+    } catch (err: any) {
+      console.error("Enquiry error:", err);
+      toast({ title: "Failed to send enquiry. Please try again.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -107,8 +121,8 @@ const Enquiry = () => {
               <label className="text-sm font-medium text-foreground mb-1.5 block">Message</label>
               <Textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Additional details..." rows={4} />
             </div>
-            <Button type="submit" size="lg" className="w-full gradient-wood border-0 text-white hover:opacity-90">
-              Submit Enquiry
+            <Button type="submit" size="lg" disabled={loading} className="w-full gradient-wood border-0 text-white hover:opacity-90">
+              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</> : "Submit Enquiry"}
             </Button>
           </form>
         </div>
