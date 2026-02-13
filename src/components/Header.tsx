@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Phone, Mail, Menu, X } from "lucide-react";
+import { Phone, Mail, Menu, X, ShoppingCart, User, LogOut, Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import { Badge } from "@/components/ui/badge";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -14,6 +17,8 @@ const navLinks = [
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { user, isAdmin, signOut } = useAuth();
+  const { count } = useCart();
 
   return (
     <header className="sticky top-0 z-50">
@@ -43,7 +48,7 @@ const Header = () => {
             </div>
             <div>
               <h1 className="text-lg font-display font-bold text-foreground leading-tight">EMMES Industries</h1>
-              <p className="text-[10px] text-muted-foreground leading-tight tracking-wider uppercase">Wooden Packaging Solutions</p>
+              <p className="text-[10px] text-muted-foreground leading-tight tracking-wider uppercase">Wooden Products</p>
             </div>
           </Link>
 
@@ -54,7 +59,7 @@ const Header = () => {
                 <Link
                   to={link.path}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    location.pathname === link.path
+                    location.pathname === link.path || (link.path === "/products" && location.pathname.startsWith("/products"))
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-muted"
                   }`}
@@ -65,14 +70,43 @@ const Header = () => {
             ))}
           </ul>
 
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors text-foreground"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            <Link to="/cart" className="relative p-2 rounded-md hover:bg-muted transition-colors text-foreground">
+              <ShoppingCart className="h-5 w-5" />
+              {count > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] bg-secondary text-secondary-foreground">
+                  {count}
+                </Badge>
+              )}
+            </Link>
+
+            {user ? (
+              <div className="hidden lg:flex items-center gap-1">
+                {isAdmin && (
+                  <Link to="/admin" className="p-2 rounded-md hover:bg-muted transition-colors text-foreground" title="Admin Panel">
+                    <Shield className="h-5 w-5" />
+                  </Link>
+                )}
+                <button onClick={signOut} className="p-2 rounded-md hover:bg-muted transition-colors text-foreground" title="Sign Out">
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </div>
+            ) : (
+              <Link to="/auth" className="hidden lg:flex p-2 rounded-md hover:bg-muted transition-colors text-foreground" title="Sign In">
+                <User className="h-5 w-5" />
+              </Link>
+            )}
+
+            {/* Mobile toggle */}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors text-foreground"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile menu */}
@@ -94,6 +128,24 @@ const Header = () => {
                   </Link>
                 </li>
               ))}
+              <li className="border-t border-border pt-2 mt-2">
+                {user ? (
+                  <>
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-md text-sm font-medium text-foreground hover:bg-muted">
+                        Admin Panel
+                      </Link>
+                    )}
+                    <button onClick={() => { signOut(); setMobileOpen(false); }} className="w-full text-left px-3 py-2.5 rounded-md text-sm font-medium text-foreground hover:bg-muted">
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link to="/auth" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-md text-sm font-medium text-foreground hover:bg-muted">
+                    Sign In / Register
+                  </Link>
+                )}
+              </li>
             </ul>
           </div>
         )}
