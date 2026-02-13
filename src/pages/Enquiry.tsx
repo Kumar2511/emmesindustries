@@ -7,12 +7,16 @@ import { useToast } from "@/hooks/use-toast";
 import { CheckCircle } from "lucide-react";
 
 const products = [
+  "Wooden Doors",
+  "Wooden Chairs",
+  "Wooden Tables",
+  "Wooden Beds",
+  "Wooden Cabinets / Wardrobes",
   "Wooden Boxes",
   "Wooden Pallets",
   "Wooden Crates",
-  "Pine Wood Boxes",
-  "Plywood Boxes",
   "Cable Drums",
+  "Other",
 ];
 
 const Enquiry = () => {
