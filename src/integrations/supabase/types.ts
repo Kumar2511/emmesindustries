@@ -52,8 +52,12 @@ export type Database = {
           customer_phone: string
           id: string
           items: Json
+          payment_method: string
+          payment_screenshot_url: string | null
+          payment_status: string
           status: string
           total: number
+          transaction_id: string | null
           user_id: string
         }
         Insert: {
@@ -63,8 +67,12 @@ export type Database = {
           customer_phone: string
           id?: string
           items?: Json
+          payment_method?: string
+          payment_screenshot_url?: string | null
+          payment_status?: string
           status?: string
           total?: number
+          transaction_id?: string | null
           user_id: string
         }
         Update: {
@@ -74,8 +82,12 @@ export type Database = {
           customer_phone?: string
           id?: string
           items?: Json
+          payment_method?: string
+          payment_screenshot_url?: string | null
+          payment_status?: string
           status?: string
           total?: number
+          transaction_id?: string | null
           user_id?: string
         }
         Relationships: []
