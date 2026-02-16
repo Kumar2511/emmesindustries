@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Loader2, ShieldAlert, Package, ClipboardList } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, ShieldAlert, Package, ClipboardList, CreditCard, CheckCircle, XCircle, Eye, ExternalLink } from "lucide-react";
 import { Navigate } from "react-router-dom";
 
 interface ProductForm {
@@ -29,6 +29,13 @@ const emptyForm: ProductForm = {
   name: "", slug: "", price: "", wood_type: "Teak", dimensions: "", description: "", category_id: "", in_stock: true, image_url: "",
 };
 
+const paymentStatusColors: Record<string, string> = {
+  pending: "bg-yellow-600 text-white",
+  submitted: "bg-blue-600 text-white",
+  approved: "bg-green-600 text-white",
+  rejected: "bg-red-600 text-white",
+};
+
 const Admin = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const { data: categories } = useCategories();
@@ -36,13 +43,14 @@ const Admin = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [tab, setTab] = useState<"products" | "orders">("products");
+  const [tab, setTab] = useState<"products" | "orders" | "payments">("products");
   const [editProduct, setEditProduct] = useState<ProductForm | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
   const [ordersLoaded, setOrdersLoaded] = useState(false);
+  const [screenshotDialog, setScreenshotDialog] = useState<string | null>(null);
 
   if (authLoading) return <div className="flex justify-center py-32"><Loader2 className="h-8 w-8 animate-spin text-secondary" /></div>;
   if (!user) return <Navigate to="/auth" replace />;
@@ -141,27 +149,45 @@ const Admin = () => {
     toast({ title: "Image uploaded" });
   };
 
+  const handlePaymentAction = async (orderId: string, action: "approved" | "rejected") => {
+    const newStatus = action === "approved" ? "confirmed" : "payment_failed";
+    const { error } = await supabase.from("orders").update({
+      payment_status: action,
+      status: newStatus,
+    }).eq("id", orderId);
+    if (error) {
+      toast({ title: error.message, variant: "destructive" });
+    } else {
+      toast({ title: `Payment ${action}` });
+      loadOrders();
+    }
+  };
+
   return (
     <div>
       <section className="gradient-forest section-padding pt-12 pb-12">
         <div className="container-max text-center">
           <h1 className="text-4xl font-display font-bold text-primary-foreground">Admin Panel</h1>
-          <p className="text-primary-foreground/70 mt-2">Manage products and orders</p>
+          <p className="text-primary-foreground/70 mt-2">Manage products, orders, and payments</p>
         </div>
       </section>
 
       <section className="section-padding bg-background">
         <div className="container-max">
           {/* Tabs */}
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-2 mb-6 flex-wrap">
             <Button variant={tab === "products" ? "default" : "outline"} onClick={() => setTab("products")} className={tab === "products" ? "gradient-forest border-0 text-primary-foreground" : ""}>
               <Package className="h-4 w-4 mr-2" /> Products
             </Button>
             <Button variant={tab === "orders" ? "default" : "outline"} onClick={() => { setTab("orders"); if (!ordersLoaded) loadOrders(); }} className={tab === "orders" ? "gradient-forest border-0 text-primary-foreground" : ""}>
               <ClipboardList className="h-4 w-4 mr-2" /> Orders
             </Button>
+            <Button variant={tab === "payments" ? "default" : "outline"} onClick={() => { setTab("payments"); if (!ordersLoaded) loadOrders(); }} className={tab === "payments" ? "gradient-forest border-0 text-primary-foreground" : ""}>
+              <CreditCard className="h-4 w-4 mr-2" /> Payments
+            </Button>
           </div>
 
+          {/* === PRODUCTS TAB === */}
           {tab === "products" && (
             <>
               <div className="flex justify-between items-center mb-4">
@@ -209,6 +235,7 @@ const Admin = () => {
             </>
           )}
 
+          {/* === ORDERS TAB === */}
           {tab === "orders" && (
             <>
               <h2 className="text-xl font-display font-bold text-foreground mb-4">Orders</h2>
@@ -225,7 +252,10 @@ const Admin = () => {
                           <h3 className="font-semibold text-foreground">{o.customer_name}</h3>
                           <p className="text-xs text-muted-foreground">{o.customer_phone} • {new Date(o.created_at).toLocaleDateString()}</p>
                         </div>
-                        <Badge className={o.status === "pending" ? "bg-yellow-600 text-white" : "bg-green-600 text-white"}>{o.status}</Badge>
+                        <div className="flex gap-2">
+                          <Badge className={paymentStatusColors[o.payment_status] || "bg-muted text-foreground"}>{o.payment_status}</Badge>
+                          <Badge className={o.status === "pending" ? "bg-yellow-600 text-white" : o.status === "confirmed" ? "bg-green-600 text-white" : "bg-red-600 text-white"}>{o.status}</Badge>
+                        </div>
                       </div>
                       <p className="text-xs text-muted-foreground mb-2">{o.customer_address}</p>
                       <div className="space-y-1">
@@ -240,8 +270,97 @@ const Admin = () => {
               )}
             </>
           )}
+
+          {/* === PAYMENTS TAB === */}
+          {tab === "payments" && (
+            <>
+              <h2 className="text-xl font-display font-bold text-foreground mb-4">Payment Verification</h2>
+              {!ordersLoaded ? (
+                <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-secondary" /></div>
+              ) : orders.filter((o) => o.payment_status === "submitted" || o.payment_status === "approved" || o.payment_status === "rejected").length === 0 ? (
+                <p className="text-center text-muted-foreground py-16">No payment submissions yet.</p>
+              ) : (
+                <div className="space-y-4">
+                  {orders
+                    .filter((o) => o.transaction_id || o.payment_status !== "pending")
+                    .map((o: any) => (
+                    <div key={o.id} className="bg-card rounded-xl border border-border p-5">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-semibold text-foreground">{o.customer_name}</h3>
+                          <p className="text-xs text-muted-foreground">{o.customer_phone} • {new Date(o.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <Badge className={paymentStatusColors[o.payment_status] || "bg-muted text-foreground"}>
+                          {o.payment_status}
+                        </Badge>
+                      </div>
+
+                      {/* Product details */}
+                      <div className="space-y-1 mb-3">
+                        {(o.items as any[])?.map((item: any, idx: number) => (
+                          <p key={idx} className="text-sm text-foreground">• {item.name} x{item.quantity} - ₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
+                        ))}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 bg-muted/50 rounded-lg p-3">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Amount</p>
+                          <p className="font-bold text-foreground">₹{Number(o.total).toLocaleString("en-IN")}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Transaction ID</p>
+                          <p className="font-mono text-sm text-foreground">{o.transaction_id || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Screenshot</p>
+                          {o.payment_screenshot_url ? (
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setScreenshotDialog(o.payment_screenshot_url)}>
+                              <Eye className="h-3 w-3 mr-1" /> View
+                            </Button>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">Not uploaded</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Admin Actions */}
+                      {o.payment_status === "submitted" && (
+                        <div className="flex gap-3">
+                          <Button onClick={() => handlePaymentAction(o.id, "approved")} className="flex-1 bg-green-600 text-white hover:bg-green-700">
+                            <CheckCircle className="h-4 w-4 mr-2" /> Approve Payment
+                          </Button>
+                          <Button onClick={() => handlePaymentAction(o.id, "rejected")} variant="destructive" className="flex-1">
+                            <XCircle className="h-4 w-4 mr-2" /> Reject Payment
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
+
+      {/* Screenshot Dialog */}
+      <Dialog open={!!screenshotDialog} onOpenChange={() => setScreenshotDialog(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display">Payment Screenshot</DialogTitle>
+          </DialogHeader>
+          {screenshotDialog && (
+            <div className="space-y-3">
+              <img src={screenshotDialog} alt="Payment screenshot" className="w-full rounded-lg" />
+              <Button asChild variant="outline" className="w-full">
+                <a href={screenshotDialog} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4 mr-2" /> Open Full Size
+                </a>
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Product Form Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
